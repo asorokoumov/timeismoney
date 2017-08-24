@@ -1,11 +1,12 @@
 from django.shortcuts import render
 import telepot
 import urllib3, json
+from django.http import HttpResponse
 
 # Create your views here.
 from django.views.decorators.csrf import csrf_exempt
 
-print("ITS ALIVE")
+print ('here am I')
 
 proxy_url = "http://proxy.server:3128"
 telepot.api._pools = {
@@ -22,9 +23,12 @@ bot.setWebhook("https://timeismoney.pythonanywhere.com/{}".format(secret), max_c
 @csrf_exempt
 def telegram_webhook(request):
     print("I'm done")
+
     update = json.loads(request.body)
     if "message" in update:
         text = update["message"]["text"]
         chat_id = update["message"]["chat"]["id"]
         bot.sendMessage(chat_id, "From the web: you said '{}'".format(text))
-    return "OK"
+
+    return HttpResponse("OK")
+
