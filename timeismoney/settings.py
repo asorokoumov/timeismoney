@@ -120,7 +120,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-OGGING = {
+LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
     'formatters': {
@@ -132,7 +132,7 @@ OGGING = {
         'default': {
             'level':'DEBUG',
             'class':'logging.handlers.RotatingFileHandler',
-            'filename': "/Users/anton.sorokoumov/antiwork/projects/timeismoney/timeismoney/log/debug.log",
+            'filename': "log/debug.log",
             'maxBytes': 1024*1024*5, # 5 MB
             'backupCount': 5,
             'formatter':'standard',
@@ -140,7 +140,7 @@ OGGING = {
         'request_handler': {
                 'level':'DEBUG',
                 'class':'logging.handlers.RotatingFileHandler',
-                'filename': "/Users/anton.sorokoumov/antiwork/projects/timeismoney/timeismoney/log/debug.log",
+                'filename': "log/debug.log",
                 'maxBytes': 1024*1024*5, # 5 MB
                 'backupCount': 5,
                 'formatter':'standard',
