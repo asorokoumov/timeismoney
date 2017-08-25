@@ -123,7 +123,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
+    'disable_existing_loggers': False,
     'formatters': {
         'standard': {
             'format': '%(asctime)s %(levelname)s %(name)s %(message)s'
@@ -133,7 +133,7 @@ LOGGING = {
         'default': {
             'level':'DEBUG',
             'class':'logging.handlers.RotatingFileHandler',
-            'filename': "/home/timeismoney/timeismoney/log/debug.log",
+            'filename': "/var/log/timeismoney.pythonanywhere.com.error.log",
             'maxBytes': 1024*1024*5, # 5 MB
             'backupCount': 5,
             'formatter':'standard',
@@ -141,7 +141,7 @@ LOGGING = {
         'request_handler': {
                 'level':'DEBUG',
                 'class':'logging.handlers.RotatingFileHandler',
-                'filename': "/home/timeismoney/timeismoney/log/debug.log",
+                'filename': "/var/log/timeismoney.pythonanywhere.com.error.log",
                 'maxBytes': 1024*1024*5, # 5 MB
                 'backupCount': 5,
                 'formatter':'standard',
