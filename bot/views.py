@@ -41,9 +41,8 @@ def logic(update):
     text = update["message"]["text"]
     chat_id = update["message"]["chat"]["id"]
     username = update["message"]["chat"]["username"]
-    worker = Worker.objects.get(telegram_username=username)
-    # check if worker exists
-    if worker:
+    try:
+        worker = Worker.objects.get(telegram_username=username)
         if text == "/start":
             # set current step to "Start" and start logging from the beginning
             start(chat_id)
@@ -140,7 +139,7 @@ def logic(update):
 
         else:
             dont_understand(chat_id)
-    else:
+    except Worker.DoesNotExist:
         unknown_user(chat_id)
 
 
@@ -160,7 +159,7 @@ def define_project_type(chat_id):
     bot.sendMessage(chat_id, "Над каким проектом ты работал?",
                     reply_markup=ReplyKeyboardMarkup(
                         keyboard=[
-                            [KeyboardButton(text="Коммерческие"), KeyboardButton(text="Внутренние")]
+                            [KeyboardButton(text="Коммерческий"), KeyboardButton(text="Внутренний")]
                         ], resize_keyboard=True, one_time_keyboard=True))
 
 
