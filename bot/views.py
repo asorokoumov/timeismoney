@@ -95,8 +95,9 @@ def output_start(chat_id):
                     reply_markup=ReplyKeyboardMarkup(
                         keyboard=[
                             [KeyboardButton(text="Создать заказ"),
-                             KeyboardButton(text="Изменить статус заказа")],
+                             KeyboardButton(text="Изменить статус заказа"),
                              KeyboardButton(text="Текущие активные заказы")]
+                        ]
                         , resize_keyboard=True, one_time_keyboard=True))
 
 
