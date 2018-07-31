@@ -45,7 +45,7 @@ def logic(update):
         worker = Worker.objects.get(telegram_username=username)
         if text == "/start":
             # set current step to "Start" and start logging from the beginning
-            start(chat_id)
+            output_start(chat_id)
             LoggingStep.objects.update_or_create(worker=worker, defaults={"step": "Start"})
 
         # check if we've already logged something for this worker
@@ -54,101 +54,184 @@ def logic(update):
 
             # "Start". Just started logging process (Расскажешь, что делал сегодня?)
             if logging_step.step == "Start":
-                if text == "Да":
-                    define_project_type(chat_id)
-                    logging_step.step = "Define project type"
-                    logging_step.save()
-                elif text == "Напомнить через 30 минут":
-                    not_ready(chat_id)
-                else:
-                    not_ready(chat_id)
+                logic_start(chat_id=chat_id, logging_step=logging_step, text=text)
 
-            # "Define Project Type" (Над каким проектом работал?)
-            elif logging_step.step == "Define project type":
-                if text == "Коммерческий":
-                    choose_commercial_project(chat_id)
-                    logging_step.step = "Choose commercial project"
-                    logging_step.save()
-                elif text == "Внутренний":
-                    choose_internal_project(chat_id)
-                    logging_step.step = "Choose internal project"
-                    logging_step.save()
-                else:
-                    not_ready(chat_id)
+            # "Choose shoes type" (Выбери тип обуви)
+            elif logging_step.step == "Choose shoes type":
+                logic_choose_shoes_type(chat_id=chat_id, logging_step=logging_step, text=text)
 
-            # "Choose internal project" (Список внутренних проектов)
-            elif logging_step.step == "Choose internal project":
-                if text == "Обучение":
-                    logging_step.project = text
-                    what_did_you_do(chat_id)
-                    logging_step.step = "What did you do?"
-                    logging_step.save()
-                elif text == "Собеседование":
-                    logging_step.project = text
-                    who_is_the_interviewee(chat_id)
-                    logging_step.step = "Who is the interviewee?"
-                    logging_step.save()
-                elif text == "Болезнь":
-                    logging_step.project = text
-                    not_ready(chat_id)
-                    logging_step.step = "Was ill all day?"
-                    logging_step.save()
-                else:
-                    not_ready(chat_id)
+            # Choose shoes size
+            elif logging_step.step == "Choose shoes size":
+                logic_choose_shoes_size(chat_id=chat_id, logging_step=logging_step, text=text)
 
-            # "Choose commercial project" (Список коммерческих проектов)
-            elif logging_step.step == "Choose commercial project":
-                logging_step.project = text
-                what_did_you_do(chat_id)
-                logging_step.step = "What did you do?"
-                logging_step.save()
+            # Choose shoes width
+            elif logging_step.step == "Choose shoes width":
+                logic_choose_shoes_type(chat_id=chat_id, logging_step=logging_step, text=text)
 
-            # "What did you do?" (Что именно делал?)
-            elif logging_step.step == "What did you do?":
-                logging_step.details = text
-                how_much_time_did_you_spend(chat_id)
-                logging_step.step = "How much time did you spend?"
-                logging_step.save()
+            # Choose sole color
+            elif logging_step.step == "Choose sole color":
+                logic_choose_sole_color(chat_id=chat_id, logging_step=logging_step, text=text)
 
-            # "Who is the interviewee?" (Кого собеседовал)
-            elif logging_step.step == "Who is the interviewee?":
-                logging_step.details = text
-                how_much_time_did_you_spend(chat_id)
-                logging_step.step = "How much time did you spend?"
-                logging_step.save()
+            # Choose top material
+            elif logging_step.step == "Choose top material":
+                logic_choose_top_material(chat_id=chat_id, logging_step=logging_step, text=text)
 
-            # "How much time did you spend?" (Сколько времени потратил)
-            elif logging_step.step == "How much time did you spend?":
-                logging_step.time_spent = float(text)
-                confirm_result(chat_id=chat_id, logging_step=logging_step)
-                logging_step.step = "Confirm result"
-                logging_step.save()
+            # Enter client info
+            elif logging_step.step == "Enter client info":
+                logic_enter_client_info(chat_id=chat_id, logging_step=logging_step, text=text)
 
-            # "Confirm result" (Сделал это. Верно?)
-            elif logging_step.step == "Confirm result":
-                if text == "Да":
-                    thank_you(chat_id)
-                    TimeSheet.objects.create(worker=logging_step.worker, project=logging_step.project,
-                                             time_spent=logging_step.time_spent, details=logging_step.details)
-                    logging_step.delete()
-
-                elif text == "Нет":
-                    not_ready(chat_id)
-                else:
-                    not_ready(chat_id)
-
+            # Output order NR and PDF
+            elif logging_step.step == "Output order NR and PDF":
+                output_order_nr_and_pdf (chat_id=chat_id, logging_step=logging_step)
         else:
             dont_understand(chat_id)
     except Worker.DoesNotExist:
         unknown_user(chat_id)
 
 
-def start(chat_id):
-    bot.sendMessage(chat_id, "Привет! Расскажешь, что делал сегодня?",
+# start
+def output_start(chat_id):
+    bot.sendMessage(chat_id, "Привет! Что надо сделать?",
                     reply_markup=ReplyKeyboardMarkup(
                         keyboard=[
-                            [KeyboardButton(text="Да"), KeyboardButton(text="Напомнить через 30 минут")]
+                            [KeyboardButton(text="Создать заказ"),
+                             KeyboardButton(text="Изменить статус заказа")],
+                             KeyboardButton(text="Текущие активные заказы")]
+                        , resize_keyboard=True, one_time_keyboard=True))
+
+
+def logic_start(text, chat_id, logging_step):
+    if text == "Создать заказ":
+        output_choose_shoes_type(chat_id)
+        logging_step.step = "Choose shoes type"
+        logging_step.save()
+    elif text == "Изменить статус заказа":
+        not_ready(chat_id)
+    elif text == "Изменить статус заказа":
+        not_ready(chat_id)
+
+    else:
+        not_ready(chat_id)
+
+
+# choose shoes type
+def output_choose_shoes_type(chat_id):
+    bot.sendMessage(chat_id, "Какой тип обуви нужно сделать?",
+                    reply_markup=ReplyKeyboardMarkup(
+                        keyboard=[
+                            [KeyboardButton(text="Кеды"), KeyboardButton(text="Туфли")]
                         ], resize_keyboard=True, one_time_keyboard=True))
+
+
+def logic_choose_shoes_type(text, chat_id, logging_step):
+    if text == "Кеды":
+        output_choose_shoes_size(chat_id)
+        logging_step.step = "Choose shoes size"
+        logging_step.save()
+    elif text == "Туфли":
+        output_choose_shoes_size(chat_id)
+        logging_step.step = "Choose shoes size"
+        logging_step.save()
+    else:
+        not_ready(chat_id)
+
+
+# choose shoes size
+def output_choose_shoes_size(chat_id):
+    bot.sendMessage(chat_id, "Какой тип обуви нужно сделать?",
+                    reply_markup=ReplyKeyboardMarkup(
+                        keyboard=[
+                            [KeyboardButton(text="39"),
+                             KeyboardButton(text="40"),
+                             KeyboardButton(text="41"),
+                             KeyboardButton(text="42"),
+                             KeyboardButton(text="43"),
+                             KeyboardButton(text="44"),
+                             KeyboardButton(text="45")]
+                        ], resize_keyboard=True, one_time_keyboard=True))
+
+
+def logic_choose_shoes_size(text, chat_id, logging_step):
+    sizes = ['39', '40', '41', '42', '43', '44', '45']
+    if any(text in s for s in sizes):
+        output_choose_shoes_width(chat_id)
+        logging_step.step = "Choose shoes width"
+        logging_step.save()
+    else:
+        not_ready(chat_id)
+
+
+# choose shoes width
+def output_choose_shoes_width(chat_id):
+    bot.sendMessage(chat_id, "Какая полнота обуви?",
+                    reply_markup=ReplyKeyboardMarkup(
+                        keyboard=[
+                            [KeyboardButton(text="Стандарт"),
+                             KeyboardButton(text="+1")]
+                        ], resize_keyboard=True, one_time_keyboard=True))
+
+
+def logic_choose_shoes_width(text, chat_id, logging_step):
+    width = ['Стандарт', '+1']
+    if any(text in s for s in width):
+        output_choose_sole_color(chat_id)
+        logging_step.step = "Choose sole color"
+        logging_step.save()
+    else:
+        not_ready(chat_id)
+
+
+# choose sole color
+def output_choose_sole_color(chat_id):
+    bot.sendMessage(chat_id, "Какой цвет подошвы?",
+                    reply_markup=ReplyKeyboardMarkup(
+                        keyboard=[
+                            [KeyboardButton(text="Белый"),
+                             KeyboardButton(text="Черный")]
+                        ], resize_keyboard=True, one_time_keyboard=True))
+
+
+def logic_choose_sole_color(text, chat_id, logging_step):
+    sole_color = ['Белый', 'Черный']
+    if any(text in s for s in sole_color):
+        output_choose_top_material(chat_id)
+        logging_step.step = "Choose top material"
+        logging_step.save()
+    else:
+        not_ready(chat_id)
+
+
+# choose top material
+def output_choose_top_material(chat_id):
+    bot.sendMessage(chat_id, "Напиши материал для верха")
+
+
+def logic_choose_top_material(text, chat_id, logging_step):
+    output_enter_client_info(chat_id)
+    logging_step.step = "Enter client info"
+    logging_step.save()
+
+
+#  enter client info
+def output_enter_client_info(chat_id):
+    bot.sendMessage(chat_id, "Напиши данные клиента")
+
+
+def logic_enter_client_info(text, chat_id, logging_step):
+    choose_commercial_project(chat_id)
+    logging_step.step = "Output order NR and PDF"
+    logging_step.save()
+
+
+# orderNR, generate pdf, finish
+def output_order_nr_and_pdf(chat_id, logging_step):
+    bot.sendMessage(chat_id, "Номер заказа: 4242")
+    bot.sendMessage(chat_id, "PDF можете скачать по ссылке: https://tinyurl.com/4poyc6x")
+    bot.sendMessage(chat_id, "До новых встреч.")
+
+    logging_step.step = "Finish"
+    logging_step.save()
+
 
 
 def dont_understand(chat_id):
